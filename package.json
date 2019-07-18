@@ -1,0 +1,26 @@
+{
+  "name": "node-hts-sdk",
+  "version": "1.0.0",
+  "description": "Order translations to Translated.com LSP using the Human Translation Service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node index.js"
+  },
+  "keywords": [
+    "translation",
+    "api",
+    "LSP",
+    "translate",
+    "quote",
+    "order",
+    "translator"
+  ],
+  "author": "Antonio Farina <ant.farina@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.14",
+    "query-string": "^6.8.1",
+    "is-url": "^1.2.4"
+  }
+}

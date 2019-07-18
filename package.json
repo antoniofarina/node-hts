@@ -2,10 +2,11 @@
   "name": "node-hts-sdk",
   "version": "1.0.0",
   "description": "Order translations to Translated.com LSP using the Human Translation Service",
-  "main": "index.js",
+  "main": "HTS.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "node index.js"
+    "run": "node HTS.js",
+    "build": "yarn install"
   },
   "keywords": [
     "translation",
@@ -21,6 +22,8 @@
   "dependencies": {
     "lodash": "^4.17.14",
     "query-string": "^6.8.1",
-    "is-url": "^1.2.4"
+    "is-url": "^1.2.4",
+    "axios": "^0.19.0",
+    "express": "^4.17.1"
   }
 }

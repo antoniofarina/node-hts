@@ -5,7 +5,7 @@
   "main": "HTS.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "node HTS.js",
+    "run": "node reveiverServer.js",
     "build": "yarn install"
   },
   "keywords": [
@@ -20,10 +20,15 @@
   "author": "Antonio Farina <ant.farina@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.19.0",
+    "express": "^4.17.1",
+    "express-session": "^1.16.2",
+    "is-url": "^1.2.4",
     "lodash": "^4.17.14",
     "query-string": "^6.8.1",
-    "is-url": "^1.2.4",
-    "axios": "^0.19.0",
-    "express": "^4.17.1"
+    "dotenv": "^8.0.0"
+  },
+  "devDependencies": {
+
   }
 }

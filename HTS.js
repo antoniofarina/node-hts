@@ -3,62 +3,77 @@ const qs = require('query-string')
 const fs = require ('fs')
 const path = require ('path')
 const isurl = require('is-url')
-const express = require ('express')
+const dotenv = require ('dotenv')
 const _ = require('lodash')
-const EventEmitter = require('events').EventEmitter
-const options = {
-    url: "https://www.translated.net/hts/index.php",
-    receiverPath: "receiveTranslation", //unused now
-    receiverPort: 8080, //unused now
-}
+
+dotenv.config({'path': path.join(process.cwd(), '/config/HTS.env')})
+const HOSTNAME=process.env.HOSTNAME
+const CID=process.env.CID
+const PASS=process.env.PASS
+const DATAFOLDER=process.env.DATAFOLDER
+const LANGUAGESFOLDER=process.env.LANGUAGESFOLDER
 
 
-class HTS extends EventEmitter {
-    constructor(cid, password) {
-        super()
-        if (!cid) {
-            throw new Error("Missing cid (customer id).")
+
+class HTS  {
+     constructor() {
+        this.cid = CID
+        this.password = PASS
+        this.languageList = null
+
+        if (!fs.existsSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER))){
+            fs.mkdirSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER),{recursive: true})
         }
-        if (!password) {
-            throw new Error("Missing password.")
+
+        if (fs.existsSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))){
+            let languages = fs.readFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))
+            this.languageList = JSON.parse(languages)
         }
 
-        this.cid = cid
-        this.password = password
+        if (!this.languageList || Object.keys(this.languageList).length === 0){
+            this._storeLanguagesList().then(() => {
+                console.log ("list", this.languageList)
+            })
+        }
 
-        this.receiverServer = null
-        this.receiverPort = options.receiverPort
-        this.receiverPath =  options.receiverPath
     }
 
     /* UTILS */
 
-    _initReceiverServer() {
-        // HERE I WOURLD START AN LISTINGIN SERVER ABLE TO RECEIVE THE TRANSLATIONS
-        // the right ENDPOINT WILL BE CORRECTLY SET DURING THE QUOTE PHASE
-
-        // DELAYED: THIS PART WILL BE DEVELOPED LATER
-        return true
-
-        this.receiverServer = express()
-        this.receiverServer.get(this.receiverPath, (req,res) => {
-            let pid =req.pid
-            let lang = req.lang
-            let buff = new Buffer(data, 'base64');
-
-            let filePath = path.join(__dirname, '/data/translations', pid +'_' + lang)
-            fs.writeFileSync(filePath, buff )
-            res.end()
-        })
-        this.receiverServer.listen (this.receiverPort)
-
-    }
 
     _isUrl(url) {
         return isurl(url)
     }
 
+    _formatLanguageList (json_list) {
+
+        let list = {iso3066:[], iso6391:[]}
+        Object.values(json_list).map ((lang) => {
+
+            list.iso3066.push(lang.rfc3066)
+            list.iso6391.push(lang.iso6391)
+        })
+        return list
+
+
+    }
+
     /* VALIDATORS */
+
+    _getDefaultParameters (){
+        let parameters = {}
+        parameters.cid = this.cid
+        parameters.p = this.password
+        parameters.of = 'json'
+        parameters.verbose = 'true'
+        return parameters
+    }
+    _validateLanguageListParameter(){
+        let parameters = this._getDefaultParameters()
+        parameters.f = 'll'
+        return parameters
+    }
+
     _validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, ie, subject, instructions) {
         if (!source_language) {
             throw new Error("Missing source language")
@@ -97,15 +112,12 @@ class HTS extends EventEmitter {
             target_languages = target_languages.join()
         }
 
-        let parameters = {}
-        parameters.cid = this.cid
-        parameters.p = this.password
-        parameters.of = 'json'
-        parameters.verbose = 'true'
+        let parameters = this._getDefaultParameters()
         parameters.f = 'quote'
 
         parameters.s = source_language
         parameters.t = target_languages
+
         if (pn) {
             parameters.pn = pn
         }
@@ -144,11 +156,7 @@ class HTS extends EventEmitter {
             throw new Error("Missing pid (project id)")
         }
 
-        let parameters = {}
-        parameters.cid = this.cid
-        parameters.p = this.password
-        parameters.of = 'json'
-        parameters.verbose = 'true'
+        let parameters = this._getDefaultParameters()
         parameters.f = 'confirm'
         parameters.c = 1
         parameters.pid = pid
@@ -160,13 +168,8 @@ class HTS extends EventEmitter {
             throw new Error("Missing pid (project id)")
         }
 
-        let parameters = {}
-        parameters.cid = this.cid
-        parameters.p = this.password
-        parameters.of = 'json'
-        parameters.verbose = 'true'
+        let parameters = this._getDefaultParameters()
         parameters.f = 'status'
-        parameters.c = 1
         parameters.pid = pid
         return parameters
     }
@@ -175,7 +178,7 @@ class HTS extends EventEmitter {
         return new Promise(async(resolve, reject) => {
             try {
                 // console.log("params ", params)
-                let res = await axios.post(options.url, qs.stringify(params, {arrayFormat: 'bracket'}))
+                let res = await axios.post(HOSTNAME, qs.stringify(params, {arrayFormat: 'bracket'}))
                 if (res.data.code == 1) {
                     resolve(res.data)
                 }else {
@@ -208,13 +211,15 @@ class HTS extends EventEmitter {
         return "https://translated.com/translation-api-specs"
     }
 
-    async receiveTranslation() {
-        return "To be implemented"
+    async _storeLanguagesList() {
+        let params = this._validateLanguageListParameter()
+        let list = await this._post(params)
+        let languages_list = this._formatLanguageList(list)
+        fs.writeFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), JSON.stringify(languages_list))
+        this.languageList =  languages_list
     }
 
-    async getStatus(pid) {
 
-    }
 
 }
 

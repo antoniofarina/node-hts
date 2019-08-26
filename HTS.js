@@ -7,11 +7,15 @@ const dotenv = require ('dotenv')
 const _ = require('lodash')
 
 dotenv.config({'path': path.join(process.cwd(), '/config/HTS.env')})
+const HTS_CONFIG = require(path.join(process.cwd(), "/config/hts.json"))
+
 const HOSTNAME=process.env.HOSTNAME
 const CID=process.env.CID
 const PASS=process.env.PASS
-const DATAFOLDER=process.env.DATAFOLDER
-const LANGUAGESFOLDER=process.env.LANGUAGESFOLDER
+const TMKEY = process.env.TMKEY
+
+const DATAFOLDER = HTS_CONFIG.datafolder
+const LANGUAGESFOLDER = HTS_CONFIG.languagesfolder
 
 
 
@@ -192,7 +196,7 @@ class HTS  {
     }
 
 
-    async quote(source_language = "", target_languages = [], pn = "", jt = "T", df = "txt", words = 0, text = "", delivery_endpoint = "", tm = "", ie="",  subject = "", instructions = "") {
+    async quote(source_language = HTS_CONFIG.s, target_languages = [], pn = HTS_CONFIG.pn, jt = HTS_CONFIG.jt, df = HTS_CONFIG.df, words = 0, text = "", delivery_endpoint = "", tm = TMKEY, ie="",  subject = "", instructions = "") {
         let params = this._validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, ie, subject, instructions)
         return this._post(params)
     }
@@ -217,10 +221,8 @@ class HTS  {
         let languages_list = this._formatLanguageList(list)
         fs.writeFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), JSON.stringify(languages_list))
         this.languageList =  languages_list
+        return (path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))
     }
-
-
-
 }
 
 exports.HTS = HTS

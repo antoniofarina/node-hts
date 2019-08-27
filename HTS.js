@@ -30,7 +30,7 @@ class HTS  {
         }
 
         this._loadLangagesList().then(() => {
-            console.log (this.languagesList)
+            //console.log (this.languagesList)
         })
 
     }

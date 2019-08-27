@@ -226,7 +226,7 @@ class HTS  {
         if (!fs.existsSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))){
             this.languagesList = await this._storeLanguagesList()
         }
-        this.languagesList = fs.readFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), "utf8")
+        this.languagesList = JSON.parse(fs.readFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), "utf8"))
     }
 }
 

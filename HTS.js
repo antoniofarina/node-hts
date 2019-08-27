@@ -23,22 +23,15 @@ class HTS  {
      constructor() {
         this.cid = CID
         this.password = PASS
-        this.languageList = null
+        this.languagesList = null
 
         if (!fs.existsSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER))){
             fs.mkdirSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER),{recursive: true})
         }
 
-        if (fs.existsSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))){
-            let languages = fs.readFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))
-            this.languageList = JSON.parse(languages)
-        }
-
-        if (!this.languageList || Object.keys(this.languageList).length === 0){
-            this._storeLanguagesList().then(() => {
-                console.log ("list", this.languageList)
-            })
-        }
+        this._loadLangagesList().then(() => {
+            console.log (this.languagesList)
+        })
 
     }
 
@@ -50,16 +43,18 @@ class HTS  {
     }
 
     _formatLanguageList (json_list) {
-
-        let list = {iso3066:[], iso6391:[]}
-        Object.values(json_list).map ((lang) => {
-
+        let list = { name: [], iso3066:[], iso6391:[]}        
+        Object.values(json_list)
+        .filter ((lang) => {
+            //console.log("NAME ", lang.name, typeof (lang.name) === 'undefined')
+            return typeof(lang.name) !== 'undefined'
+        })
+        .map ((lang) => {            
+            list.name.push(lang.name)
             list.iso3066.push(lang.rfc3066)
             list.iso6391.push(lang.iso6391)
         })
         return list
-
-
     }
 
     /* VALIDATORS */
@@ -211,11 +206,8 @@ class HTS  {
         return await this._post(params)
     }
 
-    async getSupportedLanguagesList (){
-        if (!this.languageList){
-            this._loadLangagesList()
-        }
-        return this.languageList
+    async getSupportedLanguagesList (){        
+        return this.languagesList
     }
 
     async get_documentation_url() {
@@ -225,16 +217,16 @@ class HTS  {
     async _storeLanguagesList() {        
         let params = this._validateLanguageListParameter()
         let list = await this._post(params)
-        let languages_list = this._formatLanguageList(list)
-        fs.writeFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), JSON.stringify(languages_list))
+        let languages_list = this._formatLanguageList(list)    
+        fs.writeFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), JSON.stringify(languages_list), "utf8")
         return languages_list
     }
 
-    async _loadLangagesList(){
+    async _loadLangagesList(){        
         if (!fs.existsSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))){
-            this.languageList = this._storeLanguagesList()
+            this.languagesList = await this._storeLanguagesList()
         }
-        this.languageList = fs.readFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))
+        this.languagesList = fs.readFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), "utf8")
     }
 }
 

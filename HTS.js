@@ -211,17 +211,30 @@ class HTS  {
         return await this._post(params)
     }
 
+    async getSupportedLanguagesList (){
+        if (!this.languageList){
+            this._loadLangagesList()
+        }
+        return this.languageList
+    }
+
     async get_documentation_url() {
         return "https://translated.com/translation-api-specs"
     }
 
-    async _storeLanguagesList() {
+    async _storeLanguagesList() {        
         let params = this._validateLanguageListParameter()
         let list = await this._post(params)
         let languages_list = this._formatLanguageList(list)
         fs.writeFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), JSON.stringify(languages_list))
-        this.languageList =  languages_list
-        return (path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))
+        return languages_list
+    }
+
+    async _loadLangagesList(){
+        if (!fs.existsSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))){
+            this.languageList = this._storeLanguagesList()
+        }
+        this.languageList = fs.readFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'))
     }
 }
 

@@ -228,6 +228,34 @@ class HTS  {
         }
         this.languagesList = JSON.parse(fs.readFileSync(path.join(__dirname, DATAFOLDER, LANGUAGESFOLDER, 'languages.json'), "utf8"))
     }
+
+    //HELPERS 
+    lang_iso6391FromName(langName = 'English') {
+        let index = _.indexOf(this.languagesList.name, langName)
+        if (index !== -1) {
+            return this.languagesList.iso6391[index]
+        }
+        return null
+    }
+
+    lang_iso3066FromName(langName = 'English') {
+        let index = _.indexOf(this.languagesList.name, langName)
+        if (index !== -1) {
+            return this.languagesList.iso3066[index]
+        }
+        return null
+    }
+
+    lang_nameFromIso(isoCode = 'en') {
+        let index = _.indexOf(this.languagesList.name, iso3066)
+        if (index === -1) {
+            index = _.indexOf(this.languagesList.name, iso6391)
+        }
+        if (index !== -1) {
+            return this.languagesList.name[index]
+        }
+        return null
+    }
 }
 
 exports.HTS = HTS

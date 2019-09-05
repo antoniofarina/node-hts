@@ -256,6 +256,26 @@ class HTS  {
         }
         return null
     }
+
+    isSupportedLang (lang){
+        if (!lang){
+            return null
+        }
+        let index = 0
+        index = _.indexOf(this.languagesList.iso6391, lang)
+        if (index === -1){
+            index = _.indexOf(this.languagesList.iso3066, lang)
+            if (index === -1) {
+                index = _.indexOf(this.languagesList.name, lang)
+            }
+        }
+
+        if (index ===-1) {
+            return null
+        }
+        return { name: this.languagesList.name[index], iso6391: this.languagesList.iso6391[index], iso3066: this.languagesList.iso3066[index], }
+
+    }
 }
 
 exports.HTS = HTS

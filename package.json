@@ -26,7 +26,9 @@
     "is-url": "^1.2.4",
     "lodash": "^4.17.14",
     "query-string":"^6.8.2",
-    "dotenv": "^8.0.0"
+    "dotenv": "^8.0.0",
+    "ssh2-sftp-client": "2.5.0",
+    "tmp":"0.1.0"
   },
   "devDependencies": {
 

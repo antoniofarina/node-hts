@@ -12,3 +12,8 @@ a.getSupportedLanguagesList()
         console.log(a.isSupportedLang("cc") )
 
     })
+    .then ( () => {
+        a.getDelivered("./examples.desktop").then ((content ) => {
+            console.log (content)
+        })
+    })

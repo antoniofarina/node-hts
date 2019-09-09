@@ -5,6 +5,8 @@ const path = require ('path')
 const isurl = require('is-url')
 const dotenv = require ('dotenv')
 const _ = require('lodash')
+const sftp = require('ssh2-sftp-client');
+const tmp = require('tmp');
 
 dotenv.config({'path': path.join(process.cwd(), '/config/HTS.env')})
 const HTS_CONFIG = require(path.join(process.cwd(), "/config/hts.json"))
@@ -13,11 +15,12 @@ const HOSTNAME=process.env.HOSTNAME
 const CID=process.env.CID
 const PASS=process.env.PASS
 const TMKEY = process.env.TMKEY
+const SFTP_ENDPOINT = process.env.SFTP_ENDPOINT
+const SFTP_USERNAME = process.env.SFTP_USERNAME
+const SFTP_PASSWORD = process.env.SFTP_PASSWORD
 
 const DATAFOLDER = HTS_CONFIG.datafolder
 const LANGUAGESFOLDER = HTS_CONFIG.languagesfolder
-
-
 
 class HTS  {
      constructor() {
@@ -34,7 +37,6 @@ class HTS  {
         })
 
     }
-
     /* UTILS */
 
 
@@ -274,6 +276,48 @@ class HTS  {
             return null
         }
         return { name: this.languagesList.name[index], iso6391: this.languagesList.iso6391[index], iso3066: this.languagesList.iso3066[index], }
+
+    }
+
+    async getDelivered(ftp_filepath) {
+        const config = {
+            host: SFTP_ENDPOINT,
+            port: 22,
+            username: SFTP_USERNAME
+        };
+
+        if (SFTP_PASSWORD) {
+            config.password = SFTP_PASSWORD
+        } else {
+            if (!fs.existsSync(path.join(process.cwd(), '/config/hts_sftp_endpoint,key'))) {
+                throw new Error("SFTP Error : neither password or pub key provided ")
+            }
+            config.privateKey = fs.readFileSync(path.join(process.cwd(), 'hts_sftp_endpoint.key'))
+        }
+
+        let sftp_client = new sftp()
+        try {
+
+            await sftp_client.connect(config)
+
+          //  console.log (await sftp_client.list("."))
+
+            let path_type = await sftp_client.exists(ftp_filepath)
+            if (!path_type) {
+                throw new Error(`SFTP Error : the path ${ftp_filepath} does not exists`)
+            }
+
+            if (path_type !== '-') { // d => folder ; - => file ; l => link
+                throw new Error(`SFTP Error : the path ${ftp_filepath} is not a regular file (type is ${path_type})`)
+            }
+
+            let content = await sftp_client.get(ftp_filepath)  // may be I need encode in utf8 mode {encoding: utf8}
+            //console.log ("content ", content.toString())
+            sftp_client.end()
+            return (content.toString())
+        } catch (e) {
+            throw new Error(`SFTP Error : error while fetching ${ftp_filepath}. Details :  ${e})`)
+        }
 
     }
 }

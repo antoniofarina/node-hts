@@ -4,12 +4,15 @@ const fs = require ('fs')
 const path = require ('path')
 const isurl = require('is-url')
 const dotenv = require ('dotenv')
+const pkgUp = require("pkg-up")
 const _ = require('lodash')
 const sftp = require('ssh2-sftp-client');
 const tmp = require('tmp');
 
-dotenv.config({'path': path.join(process.cwd(), '/config/HTS.env')})
-const HTS_CONFIG = require(path.join(process.cwd(), "/config/hts.json"))
+let root = path.dirname(pkgUp.sync())
+dotenv.config({ 'path': path.join(root, '/config/HTS.env') })
+const HTS_CONFIG = require(path.join(root, '/config/hts.json'))
+
 
 const HOSTNAME=process.env.HOSTNAME
 const CID=process.env.CID

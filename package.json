@@ -5,8 +5,9 @@
   "main": "HTS.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "node reveiverServer.js",
-    "build": "yarn install"
+    "run": "node index.js",
+    "build": "yarn install",
+    "depcheck": "npx depcheck"
   },
   "keywords": [
     "translation",
@@ -28,7 +29,8 @@
     "query-string":"^6.8.2",
     "dotenv": "^8.0.0",
     "ssh2-sftp-client": "2.5.0",
-    "tmp":"0.1.0"
+    "tmp":"0.1.0",
+    "pkg-up": "3.1.0"
   },
   "devDependencies": {
 

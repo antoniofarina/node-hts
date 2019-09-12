@@ -1,6 +1,6 @@
 {
   "name": "node-hts-sdk",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Order translations to Translated.com LSP using the Human Translation Service",
   "main": "HTS.js",
   "scripts": {
@@ -8,11 +8,10 @@
     "run": "node index.js",
     "build": "yarn install",
     "depcheck": "npx depcheck",
-    "publishnewversion": "git commit -a -m 'new version $npm_package_version' && git tag $npm_package_version ",
-    "pushmajor": "npm version major && $publishnewversion",
-    "pushminor": "npm version minor && $publishnewversion",
-    "pushpatch": "npm version patch && $publishnewversion",
-    "push": "git push origin --tags"
+    "newmajor": "npm version major && $publishnewversion",
+    "newminor": "npm version minor && $publishnewversion",
+    "newpatch": "npm version patch && $publishnewversion",
+    "push": "git push origin --follow-tags"
   },
   "keywords": [
     "translation",
@@ -31,16 +30,14 @@
     "express-session": "^1.16.2",
     "is-url": "^1.2.4",
     "lodash": "^4.17.14",
-    "query-string":"^6.8.2",
+    "query-string": "^6.8.2",
     "dotenv": "^8.0.0",
     "ssh2-sftp-client": "2.5.0",
-    "tmp":"0.1.0",
+    "tmp": "0.1.0",
     "pkg-up": "3.1.0",
     "is-valid-path": "0.1.1",
-    "through2":"3.0.1",
-    "mime" :"2.4.4"
+    "through2": "3.0.1",
+    "mime": "2.4.4"
   },
-  "devDependencies": {
-
-  }
+  "devDependencies": {}
 }

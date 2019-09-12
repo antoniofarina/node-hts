@@ -1,0 +1,6 @@
+- dotenv va nel client non nella libreria
+- df non può essere stabilito a priori. eliminare dal json e sostituirlo nel codice con path.extname(filename)
+- sanitizzare hts.json dalle entry inutilizzate !! DONE !!
+- cambiare l'ordine dei parametri nella quote in modo che i default possano essere effettivamente utilizzati . 
+  Al momento i valori di default non possono essere utilizzati in quanto i rispettivi parametri devono essere per forza 
+  compilati esplicitamente per raggiungere altri parametri privi di default

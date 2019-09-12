@@ -1,9 +1,6 @@
 {
-	"datafolder":"data",
-	"languagesfolder":"languages",
-	"df": "zip",
-	"pn":"translated website translation",
-	"s":"en",
-	"jt":"T",
-    "ie":"base64"
+	"default_df": "zip",
+	"default_pn":"Node HTS SDK translation project",
+	"default_s":"en",
+	"default_jt":"T"
 }

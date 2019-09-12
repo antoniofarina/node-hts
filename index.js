@@ -13,7 +13,13 @@ a.getSupportedLanguagesList()
 
     })
     .then ( () => {
-        a.getDelivered("./examples.desktop").then ((content ) => {
+        
+        a.getDeliveredSFTP2("./examples.desktop" , "/home/antonio/Scrivania/testDesltopFtp28.txt").then ((content ) => {
             console.log (content)
         })
+        /*a.getDeliveredHTTPS("http://ipv4.download.thinkbroadband.com/5MB.zip", "/home/antonio/Scrivania/testDesltophttpsss.txt").then ( (content) => {
+            console.log (content)
+        })*/
+        
     })
+    

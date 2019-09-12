@@ -1,6 +1,6 @@
 {
   "name": "node-hts-sdk",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Order translations to Translated.com LSP using the Human Translation Service",
   "main": "HTS.js",
   "scripts": {
@@ -30,7 +30,10 @@
     "dotenv": "^8.0.0",
     "ssh2-sftp-client": "2.5.0",
     "tmp":"0.1.0",
-    "pkg-up": "3.1.0"
+    "pkg-up": "3.1.0",
+    "is-valid-path": "0.1.1",
+    "through2":"3.0.1",
+    "mime" :"2.4.4"
   },
   "devDependencies": {
 

@@ -1,4 +1,5 @@
 const axios = require('axios')
+const https = require ('https')
 const qs = require('query-string')
 const fs = require ('fs')
 const path = require ('path')
@@ -8,6 +9,9 @@ const pkgUp = require("pkg-up")
 const _ = require('lodash')
 const sftp = require('ssh2-sftp-client');
 const tmp = require('tmp');
+const  isValidPath = require('is-valid-path');
+const streamWrapper = require('through2')
+const mime = require('mime');
 
 let root = path.dirname(pkgUp.sync())
 dotenv.config({ 'path': path.join(root, '/config/HTS.env') })
@@ -22,8 +26,8 @@ const SFTP_ENDPOINT = process.env.SFTP_ENDPOINT
 const SFTP_USERNAME = process.env.SFTP_USERNAME
 const SFTP_PASSWORD = process.env.SFTP_PASSWORD
 
-const DATAFOLDER = HTS_CONFIG.datafolder
-const LANGUAGESFOLDER = HTS_CONFIG.languagesfolder
+const DATAFOLDER = 'data'
+const LANGUAGESFOLDER = 'languages'
 
 class HTS  {
      constructor() {
@@ -196,8 +200,8 @@ class HTS  {
     }
 
 
-    async quote(source_language = HTS_CONFIG.s, target_languages = [], pn = HTS_CONFIG.pn, jt = HTS_CONFIG.jt, df = HTS_CONFIG.df, words = 0, text = "", delivery_endpoint = "", tm = TMKEY, ie="",  subject = "", instructions = "") {
-        let params = this._validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, ie, subject, instructions)
+    async quote(source_language = HTS_CONFIG.default_s, target_languages = [], pn = HTS_CONFIG.default_pn, jt = HTS_CONFIG.default_jt, df = HTS_CONFIG.default_df, words = 0, text = "", delivery_endpoint = HTS.HTTP_ENDPOINT, tm = TMKEY, subject = "", instructions = "") {
+        let params = this._validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, subject, instructions)
         return this._post(params)
     }
 
@@ -282,7 +286,43 @@ class HTS  {
 
     }
 
-    async getDelivered(ftp_filepath) {
+    // DOWNLOAD DELIVERED
+    async _streamToResult (responseStream , savePath, enc='utf8'){
+        console.log(typeof responseStream)
+        let writer = new Object()
+        if (savePath) {
+            if (isValidPath(savePath)) {
+                writer = fs.createWriteStream(savePath)
+            } else {
+                throw new Error(`invalid save path ${savePath}`)
+            }
+        } else {
+            writer = streamWrapper()
+        }
+
+        responseStream.pipe(writer)
+       
+        return new Promise((resolve, reject) => {
+            let responseString = ''
+            writer.on('finish', () => {
+                if (!savePath) {                    
+                    resolve({ 'content': responseString })
+                } else {
+                    resolve(true)
+                }
+            })
+            writer.on('error', reject)
+            writer.on('data', (data) => {
+                if (!savePath) {
+                    console.log("<< ", data)
+                    responseString += (typeof enc === 'string') ? data.toString(enc) : data.toString()
+                }
+            })
+        })
+    }
+
+    async getDeliveredSFTP(ftp_filepath, savePath = '', enc ='utf8') {
+        let stream = streamWrapper()
         const config = {
             host: SFTP_ENDPOINT,
             port: 22,
@@ -303,7 +343,7 @@ class HTS  {
 
             await sftp_client.connect(config)
 
-          //  console.log (await sftp_client.list("."))
+            //  console.log (await sftp_client.list("."))
 
             let path_type = await sftp_client.exists(ftp_filepath)
             if (!path_type) {
@@ -313,16 +353,44 @@ class HTS  {
             if (path_type !== '-') { // d => folder ; - => file ; l => link
                 throw new Error(`SFTP Error : the path ${ftp_filepath} is not a regular file (type is ${path_type})`)
             }
-
-            let content = await sftp_client.get(ftp_filepath)  // may be I need encode in utf8 mode {encoding: utf8}
-            //console.log ("content ", content.toString())
+            let stream = streamWrapper()
+            await sftp_client.get(ftp_filepath, stream) 
             sftp_client.end()
-            return (content.toString())
-        } catch (e) {
-            throw new Error(`SFTP Error : error while fetching ${ftp_filepath}. Details :  ${e})`)
-        }
 
+
+            let content = await this._streamToResult(stream, savePath, enc)
+            if (!savePath && _.isObject(content)) {
+                content.extension = path.extname(ftp_filepath)
+            }
+            return content
+
+        } catch (e) {
+            console.error(e)
+            throw (e)
+        }
     }
+    
+    async getDeliveredHTTPS(url, savePath='', enc='utf8') {
+        
+        const response = await axios({
+            url: url,
+            method: 'GET',
+            responseType: 'stream'
+        })
+
+        try {
+            let content =  await this._streamToResult(response.data,savePath, enc)
+            if (!savePath && _.isObject(content)) {
+                content.extension = mime.getExtension(response.headers['content-type'])
+            }
+            return content
+        } catch (e){
+            console.error(e)
+            throw(e)
+        }       
+    }
+
+    // DOWNLOAD DELIVERED END
 }
 
 exports.HTS = HTS

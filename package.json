@@ -7,7 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "run": "node index.js",
     "build": "yarn install",
-    "depcheck": "npx depcheck"
+    "depcheck": "npx depcheck",
+    "publishnewversion": "git commit -a -m 'new version $npm_package_version' && git tag $npm_package_version ",
+    "pushmajor": "npm version major && $publishnewversion",
+    "pushminor": "npm version minor && $publishnewversion",
+    "pushpatch": "npm version patch && $publishnewversion",
+    "push": "git push origin --tags"
   },
   "keywords": [
     "translation",

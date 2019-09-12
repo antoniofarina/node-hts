@@ -8,9 +8,9 @@
     "run": "node index.js",
     "build": "yarn install",
     "depcheck": "npx depcheck",
-    "newmajor": "npm version major && $publishnewversion",
-    "newminor": "npm version minor && $publishnewversion",
-    "newpatch": "npm version patch && $publishnewversion",
+    "newmajor": "npm version major && $npm_package_scripts_push",
+    "newminor": "npm version minor && $npm_package_scripts_push",
+    "newpatch": "npm version patch && $npm_package_scripts_push",
     "push": "git push origin --follow-tags"
   },
   "keywords": [

@@ -368,7 +368,7 @@ class HTS  {
     }
 
     async getDeliveredSFTP(ftp_filepath, savePath = '', enc = 'utf8') {
-        let sftp_client = this._getSFTPClient()
+        let sftp_client = await this._getSFTPClient()
 
         //  console.log (await sftp_client.list("."))
 

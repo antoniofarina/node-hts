@@ -14,9 +14,10 @@ a.getSupportedLanguagesList()
     })
     .then ( () => {
         
-        a.getDeliveredSFTP2("./examples.desktop" , "/home/antonio/Scrivania/testDesltopFtp28.txt").then ((content ) => {
+       /* a.getDeliveredSFTP2("./examples.desktop" , "/home/antonio/Scrivania/testDesltopFtp28.txt").then ((content ) => {
             console.log (content)
-        })
+        })*/
+        a.renameDeliveredSFTP('./delivered/25555676-Danish.zip', './merged/a.zip')
         /*a.getDeliveredHTTPS("http://ipv4.download.thinkbroadband.com/5MB.zip", "/home/antonio/Scrivania/testDesltophttpsss.txt").then ( (content) => {
             console.log (content)
         })*/

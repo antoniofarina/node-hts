@@ -321,8 +321,8 @@ class HTS  {
         })
     }
 
-    async getDeliveredSFTP(ftp_filepath, savePath = '', enc ='utf8') {
-        let stream = streamWrapper()
+    async _getSFTPClient (){
+
         const config = {
             host: SFTP_ENDPOINT,
             port: 22,
@@ -336,38 +336,60 @@ class HTS  {
                 throw new Error("SFTP Error : neither password or pub key provided ")
             }
             config.privateKey = fs.readFileSync(path.join(process.cwd(), 'hts_sftp_endpoint.key'))
+
         }
 
-        let sftp_client = new sftp()
-        try {
+        let sftp_client = new sftp()        
+        await sftp_client.connect(config)
+        return sftp_client 
+    }
 
-            await sftp_client.connect(config)
-
-            //  console.log (await sftp_client.list("."))
-
-            let path_type = await sftp_client.exists(ftp_filepath)
-            if (!path_type) {
-                throw new Error(`SFTP Error : the path ${ftp_filepath} does not exists`)
-            }
-
-            if (path_type !== '-') { // d => folder ; - => file ; l => link
-                throw new Error(`SFTP Error : the path ${ftp_filepath} is not a regular file (type is ${path_type})`)
-            }
-            let stream = streamWrapper()
-            await sftp_client.get(ftp_filepath, stream) 
-            sftp_client.end()
-
-
-            let content = await this._streamToResult(stream, savePath, enc)
-            if (!savePath && _.isObject(content)) {
-                content.extension = path.extname(ftp_filepath)
-            }
-            return content
-
-        } catch (e) {
-            console.error(e)
-            throw (e)
+    async renameDeliveredSFTP(ftp_srcpath, ftp_dstpath = ''){        
+        let sftp_client = await this._getSFTPClient()
+        let path_type_src = await sftp_client.exists(ftp_srcpath)
+        let path_type_dst = await sftp_client.exists(ftp_dstpath)
+        if (!path_type_src) {
+            throw new Error(`SFTP Error : the source path ${path_type_src} does not exists`)
         }
+        if (path_type_src !== '-') { // d => folder ; - => file ; l => link
+            throw new Error(`SFTP Error : the source path ${path_type_src} is not a regular file (type is ${path_type})`)
+        }
+
+        if (!path_type_dst) {
+            if (!sftp_client.exists(path.dirname(ftp_dstpath))){
+                throw new Error(`SFTP Error : the destination path ${path_type_dst} does not exists`)
+            }
+        }else {
+            if (path_type_dst === 'd'){
+                ftp_dstpath = path.join(ftp_dstpath, path.basename(ftp_srcpath)) // if folder is passed as dst path, than the moved file will have the same name as the source file
+            }
+        }
+        await sftp_client.rename(ftp_srcpath, ftp_dstpath)
+    }
+
+    async getDeliveredSFTP(ftp_filepath, savePath = '', enc = 'utf8') {
+        let sftp_client = this._getSFTPClient()
+
+        //  console.log (await sftp_client.list("."))
+
+        let path_type = await sftp_client.exists(ftp_filepath)
+        if (!path_type) {
+            throw new Error(`SFTP Error : the path ${ftp_filepath} does not exists`)
+        }
+
+        if (path_type !== '-') { // d => folder ; - => file ; l => link
+            throw new Error(`SFTP Error : the path ${ftp_filepath} is not a regular file (type is ${path_type})`)
+        }
+        let stream = streamWrapper()
+        await sftp_client.get(ftp_filepath, stream)
+        sftp_client.end()
+
+
+        let content = await this._streamToResult(stream, savePath, enc)
+        if (!savePath && _.isObject(content)) {
+            content.extension = path.extname(ftp_filepath)
+        }
+        return content
     }
     
     async getDeliveredHTTPS(url, savePath='', enc='utf8') {

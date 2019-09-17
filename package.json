@@ -20,7 +20,9 @@
     "translate",
     "quote",
     "order",
-    "translator"
+    "translator",
+    "translated.com",
+    "translated"
   ],
   "author": "Antonio Farina <ant.farina@gmail.com>",
   "license": "ISC",

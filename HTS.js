@@ -4,8 +4,6 @@ const qs = require('query-string')
 const fs = require ('fs')
 const path = require ('path')
 const isurl = require('is-url')
-const dotenv = require ('dotenv')
-const pkgUp = require("pkg-up")
 const _ = require('lodash')
 const sftp = require('ssh2-sftp-client');
 const tmp = require('tmp');
@@ -13,24 +11,21 @@ const  isValidPath = require('is-valid-path');
 const streamWrapper = require('through2')
 const mime = require('mime');
 
-let root = path.dirname(pkgUp.sync())
-dotenv.config({ 'path': path.join(root, '/config/HTS.env') })
-const HTS_CONFIG = require(path.join(root, '/config/hts.json'))
 
-
-const HOSTNAME=process.env.HOSTNAME
-const CID=process.env.CID
-const PASS=process.env.PASS
-const TMKEY = process.env.TMKEY
+const HOSTNAME=process.env.HTS_HOSTNAME
+const CID=process.env.HTS_CID
+const PASS=process.env.HTS_PASS
+const TMKEY = process.env.HTS_TMKEY
 const SFTP_ENDPOINT = process.env.SFTP_ENDPOINT
 const SFTP_USERNAME = process.env.SFTP_USERNAME
 const SFTP_PASSWORD = process.env.SFTP_PASSWORD
+const HTTP_ENDPOINT = process.env.HTTP_ENDPOINT
 
 const DATAFOLDER = 'data'
 const LANGUAGESFOLDER = 'languages'
 
 class HTS  {
-     constructor() {
+    constructor() {
         this.cid = CID
         this.password = PASS
         this.languagesList = null
@@ -82,7 +77,7 @@ class HTS  {
         return parameters
     }
 
-    _validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, ie, subject, instructions) {
+    _validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, subject, instructions) {
         if (!source_language) {
             throw new Error("Missing source language")
         }
@@ -105,11 +100,6 @@ class HTS  {
         if (!['T', 'R', 'P'].includes(jt)) {
             throw new Error("Invalid job type (T=Translation, R=Revision, P=Postediting are the allowed values)")
         }
-
-        if (!['base64'].includes(ie)) {
-            throw new Error("Invalid input encoding. Only 'base64' allowed")
-        }
-
 
         if (delivery_endpoint && !this._isUrl(delivery_endpoint)) {
             throw new Error("delivery parameter can only contain a valid public url. Example: delivery =https://site.com/receiveTranslation")
@@ -141,9 +131,7 @@ class HTS  {
         if (tm) {
             parameters.tm = tm
         }
-        if (ie) {
-            parameters.ie = ie
-        }
+        
         if (subject) {
             parameters.subject = subject
         }
@@ -200,7 +188,7 @@ class HTS  {
     }
 
 
-    async quote(source_language = HTS_CONFIG.default_s, target_languages = [], pn = HTS_CONFIG.default_pn, jt = HTS_CONFIG.default_jt, df = HTS_CONFIG.default_df, words = 0, text = "", delivery_endpoint = HTS.HTTP_ENDPOINT, tm = TMKEY, subject = "", instructions = "") {
+    async quote(source_language, target_languages = [], pn = '', jt = 'T', df = 'txt', words = 0, text = "", delivery_endpoint = HTTP_ENDPOINT, tm = TMKEY, subject = "", instructions = "") {
         let params = this._validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, subject, instructions)
         return this._post(params)
     }
@@ -349,15 +337,15 @@ class HTS  {
         let path_type_src = await sftp_client.exists(ftp_srcpath)
         let path_type_dst = await sftp_client.exists(ftp_dstpath)
         if (!path_type_src) {
-            throw new Error(`SFTP Error : the source path ${path_type_src} does not exists`)
+            throw new Error(`SFTP Error : the source path ${ftp_srcpath} does not exists`)
         }
         if (path_type_src !== '-') { // d => folder ; - => file ; l => link
-            throw new Error(`SFTP Error : the source path ${path_type_src} is not a regular file (type is ${path_type})`)
+            throw new Error(`SFTP Error : the source path ${ftp_srcpath} is not a regular file (type is ${path_type_src})`)
         }
 
         if (!path_type_dst) {
             if (!sftp_client.exists(path.dirname(ftp_dstpath))){
-                throw new Error(`SFTP Error : the destination path ${path_type_dst} does not exists`)
+                throw new Error(`SFTP Error : the destination path ${path.dirname(ftp_dstpath)} does not exists`)
             }
         }else {
             if (path_type_dst === 'd'){

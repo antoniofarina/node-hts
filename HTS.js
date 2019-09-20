@@ -8,7 +8,8 @@ const _ = require('lodash')
 const sftp = require('ssh2-sftp-client');
 const tmp = require('tmp');
 const  isValidPath = require('is-valid-path');
-const streamWrapper = require('through2')
+const streamWrapper = require('through2');
+const Duplex = require('stream').Duplex;
 const mime = require('mime');
 
 
@@ -244,9 +245,9 @@ class HTS  {
     }
 
     lang_nameFromIso(isoCode = 'en') {
-        let index = _.indexOf(this.languagesList.name, iso3066)
+        let index = _.indexOf(this.languagesList.iso3066, isoCode)
         if (index === -1) {
-            index = _.indexOf(this.languagesList.name, iso6391)
+            index = _.indexOf(this.languagesList.iso6391, isoCode)
         }
         if (index !== -1) {
             return this.languagesList.name[index]
@@ -368,8 +369,10 @@ class HTS  {
         if (path_type !== '-') { // d => folder ; - => file ; l => link
             throw new Error(`SFTP Error : the path ${ftp_filepath} is not a regular file (type is ${path_type})`)
         }
-        let stream = streamWrapper()
-        await sftp_client.get(ftp_filepath, stream)
+        let stream = new Duplex();
+        let contentBuffer = await sftp_client.get(ftp_filepath)
+        stream.push(contentBuffer)
+        stream.push(null) // to end the streaming
         sftp_client.end()
 
 

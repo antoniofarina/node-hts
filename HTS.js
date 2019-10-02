@@ -321,10 +321,10 @@ class HTS  {
         if (SFTP_PASSWORD) {
             config.password = SFTP_PASSWORD
         } else {
-            if (!fs.existsSync(path.join(process.cwd(), '/config/hts_sftp_endpoint,key'))) {
+            if (!fs.existsSync(path.join(process.cwd(), '/config/hts_sftp_endpoint.key'))) {
                 throw new Error("SFTP Error : neither password or pub key provided ")
             }
-            config.privateKey = fs.readFileSync(path.join(process.cwd(), 'hts_sftp_endpoint.key'))
+            config.privateKey = fs.readFileSync(path.join(process.cwd(), '/config/hts_sftp_endpoint.key'))
 
         }
 

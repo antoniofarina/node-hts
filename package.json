@@ -1,6 +1,6 @@
 {
   "name": "node-hts-sdk",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Order translations to Translated.com LSP using the Human Translation Service",
   "main": "HTS.js",
   "scripts": {

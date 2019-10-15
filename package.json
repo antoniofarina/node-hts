@@ -5,7 +5,7 @@
   "main": "HTS.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "node index.js",
+    "run": "node --tls-min-v1.0 index.js",
     "build": "yarn install",
     "depcheck": "npx depcheck",
     "newmajor": "npm version major && $npm_package_scripts_push",

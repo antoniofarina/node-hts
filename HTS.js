@@ -199,9 +199,10 @@ class HTS  {
         return this._post(params)
     }
 
-    async status(pid = 0) {
+    async status(pid = 0, structureOutput=false) {
         let params = this._validateStatusParams(pid)
-        return await this._post(params)
+        let status = await this._post(params)
+        return (structureOutput ? this._formatStatusEndpointOutput(status): status)
     }
 
     async getSupportedLanguagesList (){        
@@ -228,6 +229,66 @@ class HTS  {
     }
 
     //HELPERS 
+    _formatStatusEndpointOutput(result) {
+        let res = {}
+        res['summary'] = { code: result.code, message: result.message, num_jobs: result.count }
+        delete result.code
+        delete result.message
+        delete result.count
+
+        res['details'] = {}
+
+        // look for translation objects
+        Object.keys(result).forEach((key) => {
+            //console.log("key is ", key)
+            if (result[key].type == 'TRANSLATION') {
+                let obj = _.cloneDeep(result[key])
+                let t = obj.target
+                let jid = obj.jid
+                delete obj.type
+                delete obj.jid
+                delete obj.target
+                delete obj.id_job_revising //alwais zero in case of translation
+                obj.revisions = {}
+
+                if (!(key.target in res.details)) {
+                    res.details[t] = {}
+                }
+                res.details[t][jid] = obj
+
+                //reduce object
+                delete result[key]
+            }
+        })
+
+        // look for revision objects
+        Object.keys(result).forEach((key) => {
+            //console.log("key is ", key)
+            if (result[key].type == 'REVISION') {
+                let obj = _.cloneDeep(result[key])
+                let t = obj.target
+                let jid = obj.jid
+                let id_job_revising = obj.id_job_revising
+                delete obj.type
+                delete obj.jid
+                delete obj.target
+                delete obj.id_job_revising
+
+                res.details[t][id_job_revising].revisions[jid] = obj
+
+                //reduce object
+                delete result[key]
+            }
+        })
+        return res
+    }
+
+
+
+
+
+    
+
     lang_iso6391FromName(langName = 'English') {
         let index = _.indexOf(this.languagesList.name, langName)
         if (index !== -1) {

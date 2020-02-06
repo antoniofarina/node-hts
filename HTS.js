@@ -338,7 +338,7 @@ class HTS  {
 
     // DOWNLOAD DELIVERED
     async _streamToResult (responseStream , savePath, enc='utf8'){
-        console.log(typeof responseStream)
+        //console.log(typeof responseStream)
         let writer = new Object()
         if (savePath) {
             if (isValidPath(savePath)) {
@@ -401,13 +401,13 @@ class HTS  {
         if (!path_type_src) {
             let error = new Error(`SFTP Error : the path ${ftp_srcpath} does not exists`)
             error.name = "ftp_file_not_exists"
-            sftp_client.end();
+            await sftp_client.end();
             throw error             
         }
         if (path_type_src !== '-') { // d => folder ; - => file ; l => link
             let error = new Error(`SFTP Error : the path ${ftp_srcpath} is not a regular file (type is ${path_type_src})`)
             error.name = "ftp_regular_file_expected"
-            sftp_client.end();
+            await sftp_client.end();
             throw error
         }
 
@@ -415,7 +415,7 @@ class HTS  {
             if (!sftp_client.exists(path.dirname(ftp_dstpath))){
                 let error = new Error(`SFTP Error : the path ${ftp_dstpath} does not exists`)
                 error.name = "ftp_file_not_exists"
-                sftp_client.end();
+                await sftp_client.end();
                 throw error 
             }
         }else {
@@ -424,7 +424,7 @@ class HTS  {
             }
         }
         await sftp_client.rename(ftp_srcpath, ftp_dstpath)
-        sftp_client.end();
+        await sftp_client.end();
     }
 
     async getDeliveredSFTP(ftp_filepath, savePath = '', enc = 'utf8') {
@@ -436,21 +436,21 @@ class HTS  {
         if (!path_type) {
             let error = new Error(`SFTP Error : the path ${ftp_filepath} does not exists`)
             error.name = "ftp_file_not_exists"
-            sftp_client.end()
+            await sftp_client.end()
             throw error
         }
 
         if (path_type !== '-') { // d => folder ; - => file ; l => link
             let error = new Error(`SFTP Error : the path ${ftp_filepath} is not a regular file (type is ${path_type})`)
             error.name = "ftp_regular_file_expected"
-            sftp_client.end()
+            await sftp_client.end()
             throw error
         }
         let stream = new Duplex();
         let contentBuffer = await sftp_client.get(ftp_filepath)
         stream.push(contentBuffer)
         stream.push(null) // to end the streaming
-        sftp_client.end()
+        await sftp_client.end()
 
 
         let content = await this._streamToResult(stream, savePath, enc)

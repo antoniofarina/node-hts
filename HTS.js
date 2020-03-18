@@ -11,6 +11,7 @@ const  isValidPath = require('is-valid-path');
 const streamWrapper = require('through2');
 const Duplex = require('stream').Duplex;
 const mime = require('mime');
+const util= require('util')
 
 
 const HOSTNAME=process.env.HTS_HOSTNAME
@@ -251,7 +252,7 @@ class HTS  {
                 delete obj.id_job_revising //alwais zero in case of translation
                 obj.revisions = {}
 
-                if (!(key.target in res.details)) {
+                if (!(t in res.details)) {
                     res.details[t] = {}
                 }
                 res.details[t][jid] = obj

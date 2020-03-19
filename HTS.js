@@ -265,7 +265,7 @@ class HTS  {
         // look for revision objects
         Object.keys(result).forEach((key) => {
             //console.log("key is ", key)
-            if (result[key].type == 'REVISION') {
+            if (result[key].type == 'REVISION' && result[key].id_job_revising>0) {
                 let obj = _.cloneDeep(result[key])
                 let t = obj.target
                 let jid = obj.jid
@@ -274,13 +274,18 @@ class HTS  {
                 delete obj.jid
                 delete obj.target
                 delete obj.id_job_revising
-
+              
+                if (!(id_job_revising in res.details[t])) {
+                    res.details[t][id_job_revising] = {}
+                    res.details[t][id_job_revising].revisions = {}
+                }
                 res.details[t][id_job_revising].revisions[jid] = obj
 
                 //reduce object
                 delete result[key]
             }
         })
+        console.log ("res1" , util.inspect(res, {showHidden: false, depth: null}), "------")
         return res
     }
 

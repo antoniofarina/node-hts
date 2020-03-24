@@ -285,7 +285,7 @@ class HTS  {
                 delete result[key]
             }
         })
-        console.log ("res1" , util.inspect(res, {showHidden: false, depth: null}), "------")
+       // console.log ("res1" , util.inspect(res, {showHidden: false, depth: null}), "------")
         return res
     }
 

@@ -289,12 +289,6 @@ class HTS  {
         return res
     }
 
-
-
-
-
-    
-
     lang_iso6391FromName(langName = 'English') {
         let index = _.indexOf(this.languagesList.name, langName)
         if (index !== -1) {
@@ -433,10 +427,45 @@ class HTS  {
         await sftp_client.end();
     }
 
+    async getDeliveredSFTPFileList(ftp_filepath) {
+        let sftp_client = await this._getSFTPClient()
+
+        let path_parts = path.parse(ftp_filepath)
+
+        let path_to_check = ftp_filepath
+        let pattern = path_parts.base
+        if (pattern.includes("*")) {
+            path_to_check = path_parts.dir.includes("*") ? '' : path_parts.dir
+        }
+
+        let path_type = await sftp_client.exists(path_to_check)
+        if (!path_type) {
+            let error = new Error(`SFTP Error : the path ${path_to_check} does not exists`)
+            error.name = "ftp_file_not_exists"
+            await sftp_client.end()
+            throw error
+        }
+
+        if (path_type !== 'd') { // d => folder ; - => file ; l => link
+            let error = new Error(`SFTP Error : the path ${ftp_filepath} is not a regular file (type is ${path_type})`)
+            error.name = "ftp_folder_expected"
+            await sftp_client.end()
+            throw error
+        }
+        let list = await sftp_client.list(path_to_check, pattern)
+
+        let finalList = list.map((file) => {
+            return ([file.name, file.type])
+        })
+        return  finalList
+
+    }
+
     async getDeliveredSFTP(ftp_filepath, savePath = '', enc = 'utf8') {
         let sftp_client = await this._getSFTPClient()
 
         //  console.log (await sftp_client.list("."))
+        
 
         let path_type = await sftp_client.exists(ftp_filepath)
         if (!path_type) {

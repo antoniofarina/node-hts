@@ -455,7 +455,7 @@ class HTS  {
         let list = await sftp_client.list(path_to_check, pattern)
 
         let finalList = list.map((file) => {
-            return ([file.name, file.type])
+            return {'name':file.name, 'type': file.type}
         })
         return  finalList
 

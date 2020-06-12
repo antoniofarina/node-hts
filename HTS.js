@@ -19,7 +19,7 @@ const CID=process.env.HTS_CID
 const PASS=process.env.HTS_PASS
 const TMKEY = process.env.HTS_TMKEY
 const SFTP_ENDPOINT = process.env.SFTP_ENDPOINT
-const SFTP_PORT = process.env.SFTP_PORT ? process.env.SFTP_PORT : 22
+const SFTP_PORT = (typeof process.env.SFTP_PORT !== 'undefined') ? process.env.SFTP_PORT : 22
 
 const SFTP_USERNAME = process.env.SFTP_USERNAME
 const SFTP_PASSWORD = process.env.SFTP_PASSWORD

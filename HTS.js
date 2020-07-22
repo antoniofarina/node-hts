@@ -27,7 +27,7 @@ const HTTP_ENDPOINT = process.env.HTTP_ENDPOINT
 
 const DATAFOLDER = 'data'
 const LANGUAGESFOLDER = 'languages'
-console.log (HOSTNAME)
+
 class HTS  {
     constructor() {
         this.cid = CID
@@ -177,18 +177,14 @@ class HTS  {
     async _post(params){
         return new Promise(async(resolve, reject) => {
             try {
-                console.log("HTS POST params ", params)
-                let res = await axios.post(HOSTNAME, qs.stringify(params, { arrayFormat: 'bracket' }))
-                console.log("post resolved ")
+                // console.log("params ", params)
+                let res = await axios.post(HOSTNAME, qs.stringify(params, {arrayFormat: 'bracket'}))
                 if (res.data.code == 1) {
-                    console.log("post resolved 1 ")
                     resolve(res.data)
-                } else {
-                    console.log ("post rejected 0 ", res)
+                }else {
                     reject(res.data.message)
                 }
-            } catch (error) {
-                console.log("post rejected  ", error)
+            } catch (error){
                 reject (error)
             }
         })
@@ -197,9 +193,7 @@ class HTS  {
 
 
     async quote(source_language, target_languages = [], pn = '', jt = 'T', df = 'txt', words = 0, text = "", delivery_endpoint = HTTP_ENDPOINT, tm = TMKEY, subject = "", instructions = "") {
-        console.log ("here1")
         let params = this._validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, subject, instructions)
-        console.log ("here2")
         return this._post(params)
     }
 

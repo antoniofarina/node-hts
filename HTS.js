@@ -455,6 +455,7 @@ class HTS  {
             throw error
         }
         let list = await sftp_client.list(path_to_check, pattern)
+        await sftp_client.end();
 
         let finalList = list.map((file) => {
             return {'name':file.name, 'type': file.type}

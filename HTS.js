@@ -178,7 +178,7 @@ class HTS  {
         return new Promise(async(resolve, reject) => {
             try {
                 // console.log("params ", params)
-                let res = await axios.post(HOSTNAME, qs.stringify(params, {arrayFormat: 'bracket'}))
+                let res = await axios.post(HOSTNAME, qs.stringify(params, {arrayFormat: 'bracket',  rejectUnauthorized: false }))
                 if (res.data.code == 1) {
                     resolve(res.data)
                 }else {

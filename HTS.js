@@ -178,11 +178,18 @@ class HTS  {
         return new Promise(async(resolve, reject) => {
             try {
                 // console.log("params ", params)
-                let res = await axios.post(HOSTNAME, qs.stringify(params, {arrayFormat: 'bracket',  rejectUnauthorized: false }))
+                let res = await axios.post(HOSTNAME, qs.stringify(params, {arrayFormat: 'bracket'}))
                 if (res.data.code == 1) {
                     resolve(res.data)
-                }else {
-                    reject(res.data.message)
+                } else {
+                    if (res.data.message) {
+                        reject(res.data.message)    
+                    } else if (res.data) {
+                        reject(res.data)
+                    } else {
+                        reject(res)
+                    }
+                    
                 }
             } catch (error){
                 reject (error)
@@ -194,12 +201,12 @@ class HTS  {
 
     async quote(source_language, target_languages = [], pn = '', jt = 'T', df = 'txt', words = 0, text = "", delivery_endpoint = HTTP_ENDPOINT, tm = TMKEY, subject = "", instructions = "") {
         let params = this._validateQuoteParams(source_language, target_languages, pn, jt, df, words, text, delivery_endpoint, tm, subject, instructions)
-        return this._post(params)
+        return await this._post(params)
     }
 
     async confirm(pid = 0) {
         let params = this._validateConfirmParams(pid)
-        return this._post(params)
+        return await this._post(params)
     }
 
     async status(pid = 0, structureOutput=false) {

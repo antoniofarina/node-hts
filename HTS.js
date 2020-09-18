@@ -182,6 +182,7 @@ class HTS  {
                 if (res.data.code == 1) {
                     resolve(res.data)
                 } else {
+                    console.log ('HTS library _post reported HTS error ', res)
                     if (res.data.message) {
                         reject(res.data.message)    
                     } else if (res.data) {
@@ -191,7 +192,8 @@ class HTS  {
                     }
                     
                 }
-            } catch (error){
+            } catch (error) {
+                console.log ('HTS library _post reported throwed error ', error)
                 reject (error)
             }
         })

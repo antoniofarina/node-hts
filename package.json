@@ -27,7 +27,7 @@
   "author": "Antonio Farina <ant.farina@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
     "is-url": "^1.2.4",
